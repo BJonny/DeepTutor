@@ -787,9 +787,10 @@ export function ServiceConfigEditor({ service }: { service: ServiceName }) {
   );
 }
 
-function defaultModelLabel(language: "en" | "zh", index: number): string {
+function defaultModelLabel(language: "en" | "zh" | "pt-PT", index: number): string {
   const safeIndex = index > 0 ? index : 1;
-  return language === "zh" ? `模型${safeIndex}` : `Model ${safeIndex}`;
+  if (language === "zh") return `模型${safeIndex}`;
+  return language === "pt-PT" ? `Modelo ${safeIndex}` : `Model ${safeIndex}`;
 }
 
 function formatCompactTokens(value: string | number | undefined): string {

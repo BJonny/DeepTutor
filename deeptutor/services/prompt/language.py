@@ -18,13 +18,17 @@ _LANGUAGE_LABELS: dict[str, str] = {
     "fr": "Français",
     "de": "Deutsch",
     "ru": "Русский",
-    "pt": "Português",
+    "pt": "Português (Portugal)",
+    "pt-pt": "Português (Portugal)",
     "it": "Italiano",
 }
 
 
 def normalize_language(language: str | None) -> str:
-    return (language or "en").strip().lower() or "en"
+    code = (language or "en").strip().lower().replace("_", "-") or "en"
+    if code in {"pt", "pt-pt", "portuguese", "português"}:
+        return "pt-PT"
+    return code
 
 
 def language_label(language: str | None) -> str:
@@ -68,6 +72,8 @@ def append_language_directive(system_prompt: str | None, language: str | None) -
     """Append the language directive to an existing system prompt."""
     base = (system_prompt or "").rstrip()
     directive = language_directive(language).strip()
+    if directive in base:
+        return base
     if not base:
         return directive
     return f"{base}\n\n{directive}"

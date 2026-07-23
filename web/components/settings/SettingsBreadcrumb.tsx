@@ -15,7 +15,7 @@ export default function SettingsBreadcrumb() {
   const pathname = usePathname() ?? "";
   const { t, i18n } = useTranslation();
   const zh = i18n.language?.toLowerCase().startsWith("zh");
-  const tr = (l: Lang) => (zh ? l.zh : l.en);
+  const tr = (l: Lang) => (zh ? l.zh : t(l.en));
 
   const crumbs = breadcrumbFor(pathname);
 

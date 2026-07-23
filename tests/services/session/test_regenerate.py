@@ -139,6 +139,7 @@ def _seed_session(
     user_content: str = "what is 2+2?",
     assistant_content: str | None = "4",
     user_metadata: dict[str, Any] | None = None,
+    language: str = "en",
 ) -> tuple[str, int, int | None]:
     """Create a session with a user (and optional assistant) message."""
     session = asyncio.run(store.create_session())
@@ -150,7 +151,7 @@ def _seed_session(
                 "capability": "chat",
                 "tools": ["rag"],
                 "knowledge_bases": ["kb1"],
-                "language": "en",
+                "language": language,
             },
         )
     )
@@ -223,6 +224,16 @@ class TestRegenerateLastTurn:
         assert recorder.calls[0]["book_references"] == [
             {"book_id": "book-1", "page_ids": ["page-1"]}
         ]
+
+    def test_regeneration_canonicalizes_european_portuguese(self, store: SQLiteSessionStore) -> None:
+        sid, _, _ = _seed_session(store, language="pt_PT")
+        runtime = TurnRuntimeManager(store=store)
+        recorder = _FakeStartTurnRecorder()
+
+        with patch.object(runtime, "start_turn", new=recorder):
+            asyncio.run(runtime.regenerate_last_turn(sid))
+
+        assert recorder.calls[0]["language"] == "pt-PT"
 
     def test_user_tail_is_kept_and_no_delete(self, store: SQLiteSessionStore) -> None:
         sid, user_id, _ = _seed_session(store, assistant_content=None)

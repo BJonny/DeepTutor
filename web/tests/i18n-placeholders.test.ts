@@ -33,23 +33,29 @@ function listJsonFiles(dir: string): string[] {
 const NAMESPACE_KEY = /^[a-z][A-Za-z0-9]*(\.[A-Za-z0-9]+)+$/;
 
 const localesRoot = findLocalesRoot();
-const enRoot = path.join(localesRoot, "en");
+const localeDirs = fs
+  .readdirSync(localesRoot, { withFileTypes: true })
+  .filter((entry) => entry.isDirectory())
+  .map((entry) => entry.name)
+  .sort();
 
-for (const file of listJsonFiles(enRoot)) {
-  const rel = path.relative(localesRoot, file).replaceAll("\\", "/");
-  test(`en locale ${rel} has no untranslated placeholder values`, () => {
-    const json = JSON.parse(fs.readFileSync(file, "utf8")) as Record<
-      string,
-      unknown
-    >;
-    const placeholders: string[] = [];
-    for (const [key, value] of Object.entries(json)) {
-      if (NAMESPACE_KEY.test(key) && value === key) placeholders.push(key);
-    }
-    assert.deepEqual(
-      placeholders,
-      [],
-      `Found namespace keys whose value equals the key (untranslated placeholders): ${placeholders.join(", ")}`,
-    );
-  });
+for (const locale of localeDirs) {
+  for (const file of listJsonFiles(path.join(localesRoot, locale))) {
+    const rel = path.relative(localesRoot, file).replaceAll("\\", "/");
+    test(`${locale} locale ${rel} has no untranslated placeholder values`, () => {
+      const json = JSON.parse(fs.readFileSync(file, "utf8")) as Record<
+        string,
+        unknown
+      >;
+      const placeholders: string[] = [];
+      for (const [key, value] of Object.entries(json)) {
+        if (NAMESPACE_KEY.test(key) && value === key) placeholders.push(key);
+      }
+      assert.deepEqual(
+        placeholders,
+        [],
+        `Found namespace keys whose value equals the key (untranslated placeholders): ${placeholders.join(", ")}`,
+      );
+    });
+  }
 }

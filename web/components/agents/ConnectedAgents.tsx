@@ -44,9 +44,9 @@ function backendLabel(kind: string, tr: (l: Lang) => string): string {
 }
 
 export default function ConnectedAgents() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const zh = i18n.language?.toLowerCase().startsWith("zh");
-  const tr = useCallback((l: Lang) => (zh ? l.zh : l.en), [zh]);
+  const tr = useCallback((l: Lang) => (zh ? l.zh : t(l.en)), [t, zh]);
 
   const [backends, setBackends] = useState<SubagentBackendInfo[]>([]);
   const [connections, setConnections] = useState<SubagentConnection[]>([]);

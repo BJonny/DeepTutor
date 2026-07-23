@@ -248,9 +248,9 @@ const GEMINI_PERMISSION_MODES: { value: string; label: Lang }[] = [
 ];
 
 export function SubagentSettingsEditor({ kind }: { kind: string }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const zh = i18n.language?.toLowerCase().startsWith("zh");
-  const tr = useCallback((l: Lang) => (zh ? l.zh : l.en), [zh]);
+  const tr = useCallback((l: Lang) => (zh ? l.zh : t(l.en)), [t, zh]);
 
   const [options, setOptions] = useState<SubagentBackendOptions | null>(null);
   const [config, setConfig] = useState<SubagentBackendConfig>({ ...DEFAULTS });

@@ -648,6 +648,7 @@ class ResearchPipeline:
             max_questions_per_round=self.rephrase_max_questions_per_round,
             topic=topic,
         )
+        system_prompt = append_language_directive(system_prompt, self.language)
         user_prompt = self._t("rephrase.user_template", topic=topic)
         messages = self._build_system_user_messages(
             system_prompt, user_prompt, image_attachments=image_attachments
@@ -722,7 +723,9 @@ class ResearchPipeline:
         single fallback sub-topic so the pipeline can still drive the
         outline-preview UX.
         """
-        system_prompt = self._t("decompose.system")
+        system_prompt = append_language_directive(
+            self._t("decompose.system"), self.language
+        )
         user_prompt = self._t(
             "decompose.user_template",
             topic=topic,
@@ -1351,7 +1354,9 @@ class ResearchPipeline:
         for rb in blocks:
             preview = (rb.knowledge or "").strip().split("\n\n")[0][:400]
             block_summaries.append(f"- [{rb.block.block_id}] {rb.block.sub_topic}\n  {preview}")
-        system_prompt = self._t("report.outline.system")
+        system_prompt = append_language_directive(
+            self._t("report.outline.system"), self.language
+        )
         user_prompt = self._t(
             "report.outline.user_template",
             topic=topic,
@@ -1639,6 +1644,7 @@ class ResearchPipeline:
     ) -> str:
         """Common runner for the four report sub-phases: one labeled step
         with body streaming live to the chat bubble + a sub-trace card."""
+        system_prompt = append_language_directive(system_prompt, self.language)
         messages = self._build_system_user_messages(system_prompt, user_prompt)
         trace_extra = dict(extra_meta or {})
         iter_meta = self._build_simple_trace_meta(

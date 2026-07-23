@@ -33,9 +33,9 @@ type NetworkPreview = {
 };
 
 export default function SettingsHub() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const zh = i18n.language?.toLowerCase().startsWith("zh");
-  const tr = useCallback((l: Lang) => (zh ? l.zh : l.en), [zh]);
+  const tr = useCallback((l: Lang) => (zh ? l.zh : t(l.en)), [t, zh]);
 
   const { catalog, catalogEditable, diagnosticsResults, startTour } =
     useSettings();

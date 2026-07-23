@@ -78,11 +78,11 @@ export default function AppearanceSettingsPage() {
         <SettingRow
           title={t("Interface language")}
           description={t(
-            "Affects the UI only. Model output language is controlled by your prompt.",
+            "Sets the interface and preferred model response language.",
           )}
           control={
             <div className="flex gap-0.5 rounded-lg bg-[var(--muted)] p-0.5">
-              {(["en", "zh"] as const).map((v) => (
+              {(["en", "zh", "pt-PT"] as const).map((v) => (
                 <button
                   key={v}
                   onClick={() => updateLanguage(v)}
@@ -92,7 +92,11 @@ export default function AppearanceSettingsPage() {
                       : "text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
                   }`}
                 >
-                  {v === "en" ? t("language.english") : t("language.chinese")}
+                  {v === "en"
+                    ? t("language.english")
+                    : v === "zh"
+                      ? t("language.chinese")
+                      : t("language.portuguesePortugal")}
                 </button>
               ))}
             </div>

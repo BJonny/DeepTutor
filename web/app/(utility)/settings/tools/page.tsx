@@ -164,36 +164,38 @@ export default function ToolsSettingsPage() {
     if (experience.length) {
       out.push({
         key: "experience",
-        label: zh ? "体验增强" : "Experience Enhancement",
+        label: zh ? "体验增强" : t("Experience Enhancement"),
         hint: zh
           ? "用户可选；按需为 chat agent 开启或关闭。"
-          : "User-toggleable. Switch on or off to shape the chat agent's behavior.",
+          : t("User-toggleable. Switch on or off to shape the chat agent's behavior."),
         tools: experience,
       });
     }
     if (builtin.length) {
       out.push({
         key: "builtin",
-        label: zh ? "内置工具" : "Built-in Tools",
+        label: zh ? "内置工具" : t("Built-in Tools"),
         hint: zh
           ? "Chat agent 在需要时自动挂载，无需手动开关。"
-          : "Mounted automatically by the chat agent when needed. Not user-toggleable.",
+          : t("Mounted automatically by the chat agent when needed. Not user-toggleable."),
         tools: builtin,
       });
     }
     for (const [cap, list] of capabilities) {
-      const label = CAPABILITY_LABELS[cap]?.[zh ? "zh" : "en"] ?? cap;
+      const label = zh
+        ? (CAPABILITY_LABELS[cap]?.zh ?? cap)
+        : t(CAPABILITY_LABELS[cap]?.en ?? cap);
       out.push({
         key: `cap:${cap}`,
-        label: zh ? `${label} · 能力工具` : `${label} · Capability Tools`,
+        label: zh ? `${label} · 能力工具` : `${label} · ${t("Capability Tools")}`,
         hint: zh
           ? "该能力的专属工具，仅在此能力运行时挂载。"
-          : "Tools specific to this capability; mounted only when it runs.",
+          : t("Tools specific to this capability; mounted only when it runs."),
         tools: list,
       });
     }
     return out;
-  }, [tools, language]);
+  }, [tools, language, t]);
 
   const toggleExpanded = (name: string) => {
     setExpanded((prev) => {
@@ -255,7 +257,7 @@ export default function ToolsSettingsPage() {
                 <div className="overflow-hidden rounded-xl border border-[var(--border)]/60 bg-[var(--card)]/40">
                   {list.map((tool, idx) => {
                     const isOpen = expanded.has(tool.name);
-                    const hints = tool.hints[language];
+                    const hints = language === "zh" ? tool.hints.zh : tool.hints.en;
                     const isPending = pending.has(tool.name);
                     const isComingSoon = !!tool.coming_soon;
                     const isEnabled =
@@ -302,9 +304,7 @@ export default function ToolsSettingsPage() {
                                 )}
                                 {isComingSoon && (
                                   <span className="inline-flex items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--muted)]/40 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-[var(--muted-foreground)]">
-                                    {language === "zh"
-                                      ? "敬请期待"
-                                      : "Coming soon"}
+                                    {language === "zh" ? "敬请期待" : t("Coming soon")}
                                   </span>
                                 )}
                               </div>
@@ -333,7 +333,7 @@ export default function ToolsSettingsPage() {
                                   /* locked */
                                 }}
                                 label={
-                                  language === "zh" ? "敬请期待" : "Coming soon"
+                                  language === "zh" ? "敬请期待" : t("Coming soon")
                                 }
                               />
                             ) : tool.toggleable ? (

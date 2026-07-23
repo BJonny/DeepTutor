@@ -6,9 +6,11 @@ from typing import Any
 
 
 def _parse_language(language: str | None) -> str:
-    raw = (language or "en").strip().lower()
+    raw = (language or "en").strip().lower().replace("_", "-")
     if raw.startswith("zh") or raw in {"cn", "chinese"}:
         return "zh"
+    if raw.startswith("pt") or raw in {"portuguese", "português"}:
+        return "pt-PT"
     return "en"
 
 
@@ -58,6 +60,29 @@ _MESSAGES: dict[str, dict[str, str]] = {
         "sandbox.command_blocked": "错误：命令被安全防护拦截（匹配危险模式）。",
         "sandbox.disabled_for_account": "你的账号已禁用代码执行。",
         "sandbox.no_backend": "没有可用的沙箱后端",
+    },
+    "pt-PT": {
+        "api.content_required": "o conteúdo é obrigatório",
+        "api.invalid_channels_config": "Configuração de canais inválida",
+        "api.partner_already_exists": "O parceiro '{name}' já existe",
+        "api.partner_not_found": "Parceiro não encontrado",
+        "api.partner_not_found_or_not_running": "Parceiro não encontrado ou inativo",
+        "api.partner_not_running": "O parceiro não está em execução",
+        "api.partner_stopped_start_required": "O parceiro está parado. Inicie-o antes de conversar.",
+        "api.persona_already_exists": "A persona já existe: {name}",
+        "api.persona_name_required": "O nome da persona é obrigatório",
+        "api.persona_not_found": "Persona não encontrada: {name}",
+        "api.soul_already_exists": "A Soul '{name}' já existe",
+        "api.soul_content_empty": "O conteúdo personalizado da Soul está vazio",
+        "api.soul_library_not_found": "A Soul '{name}' não foi encontrada na biblioteca",
+        "api.soul_not_found": "Soul não encontrada",
+        "api.tool_not_found": "Ferramenta '{name}' não encontrada",
+        "mcp.configure_command_or_url": "Servidor {name!r}: configure um comando (stdio) ou um URL.",
+        "mcp.configure_before_testing": "Configure um comando (stdio) ou um URL antes de testar.",
+        "mcp.server_error": "Servidor {name!r}: {error}",
+        "sandbox.command_blocked": "Erro: comando bloqueado pela proteção de segurança (padrão perigoso).",
+        "sandbox.disabled_for_account": "A execução de código está desativada para a sua conta.",
+        "sandbox.no_backend": "não existe nenhum ambiente isolado disponível",
     },
 }
 

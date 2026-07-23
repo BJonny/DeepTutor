@@ -17,6 +17,7 @@ from deeptutor.core.stream import StreamEvent, StreamEventType
 from deeptutor.services.llm.utils import clean_thinking_tags
 from deeptutor.services.path_service import get_path_service
 from deeptutor.services.session.protocol import SessionStoreProtocol
+from deeptutor.services.settings.interface_settings import _normalize_language
 
 if TYPE_CHECKING:
     from deeptutor.services.llm.config import LLMConfig
@@ -666,6 +667,10 @@ class TurnRuntimeManager:
             await self._fail_orphan_running_turn(turn)
 
     async def start_turn(self, payload: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+        payload = {
+            **payload,
+            "language": _normalize_language(str(payload.get("language") or "en")),
+        }
         capability = str(payload.get("capability") or "chat")
         raw_config = dict(payload.get("config", {}) or {})
         runtime_only_keys = (
@@ -898,7 +903,9 @@ class TurnRuntimeManager:
             if overrides.get("knowledge_bases") is not None
             else preferences.get("knowledge_bases") or []
         )
-        language = str(overrides.get("language") or preferences.get("language") or "en")
+        language = _normalize_language(
+            str(overrides.get("language") or preferences.get("language") or "en")
+        )
 
         config: dict[str, Any] = dict(overrides.get("config") or {})
         config.update(

@@ -27,6 +27,27 @@ from deeptutor.services.llm import (
 )
 from deeptutor.services.llm import stream as llm_stream
 from deeptutor.services.prompt import get_prompt_manager
+from deeptutor.services.prompt.language import append_language_directive
+
+
+def _apply_language_directive(
+    system_prompt: str,
+    messages: list[dict[str, Any]] | None,
+    language: str,
+) -> tuple[str, list[dict[str, Any]] | None]:
+    """Apply the requested output language to direct and pre-built prompts."""
+    localized_system = append_language_directive(system_prompt, language)
+    if not messages:
+        return localized_system, messages
+
+    localized_messages = [dict(message) for message in messages]
+    for message in localized_messages:
+        if message.get("role") == "system" and isinstance(message.get("content"), str):
+            message["content"] = append_language_directive(message["content"], language)
+            break
+    else:
+        localized_messages.insert(0, {"role": "system", "content": localized_system})
+    return localized_system, localized_messages
 
 
 class BaseAgent(ABC):
@@ -380,6 +401,9 @@ class BaseAgent(ABC):
         Returns:
             LLM response text
         """
+        system_prompt, messages = _apply_language_directive(
+            system_prompt, messages, self.language
+        )
         model = model or self.get_model()
         temperature = temperature if temperature is not None else self.get_temperature()
         max_tokens = max_tokens if max_tokens is not None else self.get_max_tokens()
@@ -541,6 +565,9 @@ class BaseAgent(ABC):
         Yields:
             Response chunks as strings
         """
+        system_prompt, messages = _apply_language_directive(
+            system_prompt, messages, self.language
+        )
         model = model or self.get_model()
         temperature = temperature if temperature is not None else self.get_temperature()
         max_tokens = max_tokens if max_tokens is not None else self.get_max_tokens()

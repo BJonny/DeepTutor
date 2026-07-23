@@ -107,7 +107,7 @@ export type Catalog = {
 
 export type UiSettings = {
   theme: "light" | "dark" | "glass" | "snow";
-  language: "en" | "zh";
+  language: "en" | "zh" | "pt-PT";
   code_block_theme: string;
   code_block_show_line_numbers: boolean;
   code_block_wrap_long_lines: boolean;
@@ -397,7 +397,7 @@ function nextModelName(
   models: CatalogModel[],
   language: UiSettings["language"],
 ): string {
-  const prefix = language === "zh" ? "模型" : "Model ";
+  const prefix = language === "zh" ? "模型" : language === "pt-PT" ? "Modelo " : "Model ";
   const used = new Set(models.map((model) => model.name.trim()));
   let index = models.length + 1;
   while (used.has(`${prefix}${index}`)) {

@@ -48,7 +48,15 @@ import {
   readStoredCodeBlockWrapLongLines,
   writeStoredCodeBlockWrapLongLines,
   CODE_BLOCK_SETTINGS_EVENT,
+  normalizeLanguage,
 } from "../context/app-shell-storage";
+
+test("app-shell-storage: normalizes European Portuguese language aliases", () => {
+  assert.equal(normalizeLanguage("pt-PT"), "pt-PT");
+  assert.equal(normalizeLanguage("pt_PT"), "pt-PT");
+  assert.equal(normalizeLanguage("pt"), "pt-PT");
+  assert.equal(normalizeLanguage("portuguese"), "pt-PT");
+});
 
 test("app-shell-storage: code block theme defaults to oneDark", () => {
   assert.equal(DEFAULT_CODE_BLOCK_THEME, "oneDark");

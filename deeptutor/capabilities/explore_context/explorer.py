@@ -43,6 +43,7 @@ from deeptutor.core.trace import build_trace_metadata, merge_trace_metadata, new
 from deeptutor.runtime.registry.tool_registry import get_tool_registry
 from deeptutor.services.llm import clean_thinking_tags, get_llm_config, get_token_limit_kwargs
 from deeptutor.services.llm import stream as llm_stream
+from deeptutor.services.prompt.language import append_language_directive, normalize_language
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +89,7 @@ class ContextExplorer:
     """Investigate the turn's attached sources and return an objective briefing."""
 
     def __init__(self, *, language: str, prompts: dict[str, Any]) -> None:
-        self.language = "zh" if str(language or "en").lower().startswith("zh") else "en"
+        self.language = normalize_language(language)
         self._prompts = prompts or {}
         cfg = get_llm_config()
         self.model = getattr(cfg, "model", None)
@@ -372,7 +373,7 @@ class ContextExplorer:
         sources_text = self._render_source_blocks(source_index)
         if not sources_text:
             return ""
-        system_prompt = self._t("system")
+        system_prompt = append_language_directive(self._t("system"), self.language)
         user_template = self._t("user_template")
         if not system_prompt or not user_template:
             logger.warning("explore_context single-pass prompts missing; skipping pre-pass")

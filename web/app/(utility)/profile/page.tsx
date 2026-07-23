@@ -198,7 +198,12 @@ export default function ProfilePage() {
         ? null
         : fallback.color;
   const isAdmin = profile?.role === "admin";
-  const lang: Language = i18n.language?.startsWith("zh") ? "zh" : "en";
+  const normalizedLanguage = i18n.language?.toLowerCase().replaceAll("_", "-") ?? "en";
+  const lang: Language = normalizedLanguage.startsWith("zh")
+    ? "zh"
+    : normalizedLanguage.startsWith("pt")
+      ? "pt-PT"
+      : "en";
   const joinedDate = profile?.created_at ? new Date(profile.created_at) : null;
   const joined =
     joinedDate && !Number.isNaN(joinedDate.getTime())

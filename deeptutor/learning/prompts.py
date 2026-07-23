@@ -14,6 +14,7 @@ from typing import Any
 import yaml
 
 from deeptutor.services.config import parse_language
+from deeptutor.services.prompt.language import append_language_directive
 
 _PROMPT_DIR = Path(__file__).with_name("prompts")
 
@@ -31,7 +32,7 @@ def _get_nested(data: dict[str, Any], path: str, default: str = "") -> str:
 def get_learning_prompts(language: str = "zh") -> dict[str, Any]:
     """Load localized Mastery Path LLM prompts."""
     lang = parse_language(language)
-    candidates = [lang, "zh" if lang != "zh" else "en"]
+    candidates = [lang, "en" if lang != "en" else "zh"]
     for candidate in candidates:
         path = _PROMPT_DIR / f"{candidate}.yaml"
         if path.exists():
@@ -47,7 +48,9 @@ def notebook_generation_prompts(language: str, records_json: str) -> tuple[str, 
     prompts = get_learning_prompts(language)
     system_prompt = _get_nested(prompts, "notebook.system", NOTEBOOK_SYSTEM)
     user_template = _get_nested(prompts, "notebook.user", NOTEBOOK_USER)
-    return system_prompt, user_template.format(records_json=records_json)
+    return append_language_directive(system_prompt, language), user_template.format(
+        records_json=records_json
+    )
 
 
 def default_module_name(language: str, index: int) -> str:

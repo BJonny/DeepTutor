@@ -58,9 +58,9 @@ export default function EduHubImportModal({
   /** Names of skills already installed locally — shown as "已导入". */
   installedNames?: Set<string>;
 }) {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const zh = i18n.language?.toLowerCase().startsWith("zh");
-  const tr = useCallback((cn: string, en: string) => (zh ? cn : en), [zh]);
+  const tr = useCallback((cn: string, en: string) => (zh ? cn : t(en)), [t, zh]);
 
   const [skills, setSkills] = useState<HubSkillListing[] | null>(null);
   const [webUrl, setWebUrl] = useState<string>(EDUHUB_FALLBACK);

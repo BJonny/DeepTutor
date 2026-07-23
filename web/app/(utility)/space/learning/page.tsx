@@ -35,9 +35,9 @@ import {
  * that session in mastery mode.
  */
 export default function MasteryPathPage() {
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   const zh = i18n.language?.toLowerCase().startsWith("zh");
-  const tr = useCallback((cn: string, en: string) => (zh ? cn : en), [zh]);
+  const tr = useCallback((cn: string, en: string) => (zh ? cn : t(en)), [t, zh]);
   const router = useRouter();
 
   const [paths, setPaths] = useState<ProgressSummary[]>([]);
