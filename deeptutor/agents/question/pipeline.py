@@ -1721,13 +1721,17 @@ class QuestionPipeline:
     def _render_quiz_history(self, history: list[QuizHistoryEntry]) -> str:
         if not history:
             return self._t("empty.no_quiz_history")
+        learner_label = (
+            "resposta do aluno" if self.language.lower().startswith("pt") else "learner answer"
+        )
+        reference_label = "referência" if self.language.lower().startswith("pt") else "reference"
         lines = [
             (
                 f"- ({entry.turn_id or '?'}) [{self._correctness_label(entry.is_correct)}] "
                 f"{entry.question[:160]}"
                 + (
-                    f" — learner answer: {entry.user_answer[:80]}; "
-                    f"reference: {entry.correct_answer[:80]}"
+                    f" — {learner_label}: {entry.user_answer[:80]}; "
+                    f"{reference_label}: {entry.correct_answer[:80]}"
                     if entry.user_answer or entry.correct_answer
                     else ""
                 )
@@ -1737,6 +1741,14 @@ class QuestionPipeline:
         return "\n".join(lines)
 
     def _correctness_label(self, is_correct: bool | None) -> str:
+        if self.language.lower().startswith("pt"):
+            return (
+                "correto"
+                if is_correct is True
+                else "incorreto"
+                if is_correct is False
+                else "desconhecido"
+            )
         if is_correct is True:
             return "correct" if self.language != "zh" else "做对"
         if is_correct is False:
@@ -1745,10 +1757,11 @@ class QuestionPipeline:
 
     def _render_plan_summary(self, plan: QuizPlan) -> str:
         if not plan.templates:
-            return "(empty plan)"
+            return "(plano vazio)" if self.language.lower().startswith("pt") else "(empty plan)"
         lines = []
         if plan.analysis:
-            lines.append(f"Analysis: {plan.analysis}")
+            label = "Análise" if self.language.lower().startswith("pt") else "Analysis"
+            lines.append(f"{label}: {plan.analysis}")
         for template in plan.templates:
             lines.append(
                 f"  - [{template.question_id}] ({template.question_type}/"
@@ -1778,23 +1791,36 @@ class QuestionPipeline:
             return self._t("empty.no_reference")
         lines: list[str] = []
         if reference_q:
-            lines.append(f"Reference question:\n{reference_q}")
+            label = (
+                "Pergunta de referência"
+                if self.language.lower().startswith("pt")
+                else "Reference question"
+            )
+            lines.append(f"{label}:\n{reference_q}")
         if reference_a:
-            lines.append(f"Reference answer:\n{reference_a}")
+            label = (
+                "Resposta de referência"
+                if self.language.lower().startswith("pt")
+                else "Reference answer"
+            )
+            lines.append(f"{label}:\n{reference_a}")
         return "\n\n".join(lines)
 
     def _render_question_markdown(self, qa: QuizPair, ordinal: int) -> str:
-        header = "题目" if self.language == "zh" else "Question"
+        is_pt = self.language.lower().startswith("pt")
+        header = "题目" if self.language == "zh" else "Pergunta" if is_pt else "Question"
         lines = [f"### {header} {ordinal}\n", qa.question]
         if isinstance(qa.options, dict) and qa.options:
             for key in _CHOICE_KEYS:
                 if key in qa.options:
                     lines.append(f"- {key}. {qa.options[key]}")
         if qa.correct_answer:
-            answer_label = "答案" if self.language == "zh" else "Answer"
+            answer_label = "答案" if self.language == "zh" else "Resposta" if is_pt else "Answer"
             lines.append(f"\n**{answer_label}:** {qa.correct_answer}")
         if qa.explanation:
-            expl_label = "解析" if self.language == "zh" else "Explanation"
+            expl_label = (
+                "解析" if self.language == "zh" else "Explicação" if is_pt else "Explanation"
+            )
             lines.append(f"\n**{expl_label}:** {qa.explanation}")
         return "\n".join(lines).strip()
 

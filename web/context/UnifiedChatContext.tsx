@@ -915,6 +915,9 @@ export function UnifiedChatProvider({
 }) {
   const [state, dispatch] = useReducer(reducer, initialState);
   const stateRef = useRef(initialState);
+  // Updated synchronously before reducer commits so a language change followed
+  // by an immediate Send cannot reuse the previous locale on the wire.
+  const languageRef = useRef(readStoredLanguage());
   const runnersRef = useRef<
     Map<
       string,
@@ -1214,6 +1217,8 @@ export function UnifiedChatProvider({
   const loadSession = useCallback(
     async (sessionId: string, signal?: AbortSignal) => {
       const session = await getSession(sessionId, signal);
+      const currentLanguage = readStoredLanguage();
+      languageRef.current = currentLanguage;
       const activeTurn = Array.isArray(session.active_turns)
         ? session.active_turns[0]
         : undefined;
@@ -1242,7 +1247,7 @@ export function UnifiedChatProvider({
         // The Settings language is global UI state. Historical sessions may
         // have stale persisted preferences, so new turns follow the current
         // app language rather than the language saved when the session began.
-        language: readStoredLanguage(),
+        language: currentLanguage,
         selectedBranches: normalizeSelectedBranches(
           session.preferences?.selected_branches,
         ),
@@ -1275,7 +1280,9 @@ export function UnifiedChatProvider({
     if (typeof window === "undefined") return;
 
     const syncLanguage = (language: string | null | undefined) => {
-      dispatch({ type: "SET_LANGUAGE", lang: normalizeLanguage(language) });
+      const normalized = normalizeLanguage(language);
+      languageRef.current = normalized;
+      dispatch({ type: "SET_LANGUAGE", lang: normalized });
     };
     const onLanguage = (event: Event) => {
       const detail = (event as CustomEvent<{ language?: string }>).detail;
@@ -1384,8 +1391,10 @@ export function UnifiedChatProvider({
         replaySnapshot && "llmSelection" in replaySnapshot
           ? (replaySnapshot.llmSelection ?? null)
           : session.llmSelection;
+      // The ref updates before reducer commits, so a locale switch followed by
+      // an immediate Send cannot leak the previous language onto the wire.
       const effectiveLanguage =
-        replaySnapshot?.language ?? readStoredLanguage();
+        replaySnapshot?.language ?? languageRef.current;
       // Persona resolution: replay snapshot wins; then an explicit per-call
       // persona (quiz follow-up surface); then the session-level preference.
       // Always a string — "" means Default / no persona.
@@ -1619,7 +1628,7 @@ export function UnifiedChatProvider({
       type: "regenerate",
       session_id: session.sessionId,
       overrides: {
-        language: readStoredLanguage(),
+        language: languageRef.current,
       },
     });
   }, [sendThroughRunner]);
@@ -1677,7 +1686,9 @@ export function UnifiedChatProvider({
   }, []);
 
   const setLanguage = useCallback((lang: string) => {
-    dispatch({ type: "SET_LANGUAGE", lang });
+    const normalized = normalizeLanguage(lang);
+    languageRef.current = normalized;
+    dispatch({ type: "SET_LANGUAGE", lang: normalized });
   }, []);
 
   const renameSessionTitle = useCallback(async (title: string) => {

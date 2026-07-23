@@ -44,6 +44,7 @@ import {
   writeStoredSidebarCollapsed,
   type AppLanguage,
 } from "@/context/app-shell-storage";
+import { apiFetch, apiUrl } from "@/lib/api";
 
 interface AppShellContextValue {
   theme: Theme;
@@ -181,6 +182,30 @@ export function AppShellProvider({ children }: { children: React.ReactNode }) {
         CODE_BLOCK_SETTINGS_EVENT,
         onCodeBlockSettings,
       );
+    };
+  }, []);
+
+  // The backend preference is user-scoped, while localStorage is shared by
+  // every account in this browser. Refresh it after authentication so one user
+  // cannot inherit another account's response language.
+  useEffect(() => {
+    let cancelled = false;
+    void apiFetch(apiUrl("/api/v1/settings"))
+      .then(async (response) => {
+        if (!response.ok) return;
+        const payload = (await response.json()) as {
+          ui?: { language?: AppLanguage };
+        };
+        const backendLanguage = payload.ui?.language;
+        if (!cancelled && backendLanguage) {
+          writeStoredLanguage(backendLanguage);
+        }
+      })
+      .catch(() => {
+        // Login and backend-unavailable pages keep the local hydrated value.
+      });
+    return () => {
+      cancelled = true;
     };
   }, []);
 

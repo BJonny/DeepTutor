@@ -60,6 +60,7 @@ import {
   type MessageRequestSnapshot,
 } from "@/context/UnifiedChatContext";
 import { useAppShell } from "@/context/AppShellContext";
+import { readStoredLanguage } from "@/context/app-shell-storage";
 import type { FilePreviewSource } from "@/components/chat/preview/previewerFor";
 import type { LLMSelection, StreamEvent } from "@/lib/unified-ws";
 import {
@@ -322,6 +323,7 @@ export default function ChatPage() {
     setKBs,
     setLLMSelection,
     setPersonaSelection,
+    setLanguage: setChatLanguage,
     sendMessage,
     cancelStreamingTurn,
     submitUserReply,
@@ -333,6 +335,16 @@ export default function ChatPage() {
     loadSession,
     renameSessionTitle,
   } = useUnifiedChat();
+
+  // AppShell controls the locale visible to the user; chat requests must use
+  // that same locale. During hydration AppShell starts at English for SSR, so
+  // only sync once its value agrees with the hydrated storage value. This
+  // avoids a brief false switch to English on a pt-PT page.
+  useEffect(() => {
+    if (appLanguage === readStoredLanguage()) {
+      setChatLanguage(appLanguage);
+    }
+  }, [appLanguage, setChatLanguage]);
 
   const [knowledgeBases, setKnowledgeBases] = useState<KnowledgeBase[]>([]);
   // A connected agent to preselect once it loads, from `?agent=<name>` on the

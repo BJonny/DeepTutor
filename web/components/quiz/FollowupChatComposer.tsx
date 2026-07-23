@@ -17,6 +17,7 @@ import dynamic from "next/dynamic";
 import { MessageSquare } from "lucide-react";
 import { useTranslation } from "react-i18next";
 import ChatComposer from "@/components/chat/home/ChatComposer";
+import { useAppShell } from "@/context/AppShellContext";
 import {
   type QuizFollowupTabContext,
   useFollowupThread,
@@ -94,6 +95,7 @@ interface FollowupChatComposerProps {
 
 function FollowupChatComposerImpl({ context }: FollowupChatComposerProps) {
   const { t } = useTranslation();
+  const { language } = useAppShell();
   const controller = useQuizFollowupController();
   const thread = useFollowupThread(context.questionKey);
 
@@ -543,7 +545,7 @@ function FollowupChatComposerImpl({ context }: FollowupChatComposerProps) {
         content,
         attachments: [...answerImageAttachments, ...composerAttachments],
         config,
-        language: context.language,
+        language,
         knowledgeBases: selectedKnowledgeBases,
         notebookReferences: notebookReferencesPayload,
         historyReferences: historyReferencesPayload,
@@ -568,6 +570,7 @@ function FollowupChatComposerImpl({ context }: FollowupChatComposerProps) {
       context,
       controller,
       historyReferencesPayload,
+      language,
       llmSelection,
       memoryReferencesPayload,
       notebookReferencesPayload,

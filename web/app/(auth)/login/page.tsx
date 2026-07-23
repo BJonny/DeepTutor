@@ -41,7 +41,10 @@ function LoginPageContent() {
     const result = await login(username, password);
 
     if (result.ok) {
-      router.replace(next);
+      // Full navigation remounts user-scoped providers so AppShell can hydrate
+      // this account's backend language instead of retaining the prior/local
+      // browser value from the unauthenticated login screen.
+      window.location.assign(next);
     } else {
       setError(result.error ?? t("Login failed"));
       setLoading(false);

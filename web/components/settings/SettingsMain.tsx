@@ -40,7 +40,7 @@ export default function SettingsMain({
             <SettingsToolbar />
           </div>
         )}
-        <SettingsLoadStatusBanner />
+        {showToolbar && <SettingsLoadStatusBanner />}
       </div>
       {/* Inner scroll container. Sticky elements inside (e.g. the profile-list
           aside in ServiceConfigEditor) anchor to this ancestor instead of the

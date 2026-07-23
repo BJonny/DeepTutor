@@ -77,3 +77,36 @@ def test_european_portuguese_language_directive_is_explicit() -> None:
     assert "Português (Portugal)" in localized
     assert messages is not None
     assert "Português (Portugal)" in str(messages[0]["content"])
+
+
+def test_quiz_history_and_correctness_labels_are_european_portuguese() -> None:
+    from deeptutor.agents.question.pipeline import QuestionPipeline, QuizHistoryEntry
+
+    pipeline = QuestionPipeline.__new__(QuestionPipeline)
+    pipeline.language = "pt-PT"
+    history = pipeline._render_quiz_history(
+        [
+            QuizHistoryEntry(
+                question="Qual é a capital de Portugal?",
+                question_type="short_answer",
+                correct_answer="Lisboa",
+                user_answer="Lisboa",
+                is_correct=True,
+            )
+        ]
+    )
+
+    assert "resposta do aluno: Lisboa" in history
+    assert "referência: Lisboa" in history
+    assert "[correto]" in history
+    assert pipeline._correctness_label(False) == "incorreto"
+
+
+def test_empty_quiz_plan_feedback_is_european_portuguese() -> None:
+    from deeptutor.agents.question.pipeline import QuestionPipeline, QuizPlan
+
+    pipeline = QuestionPipeline.__new__(QuestionPipeline)
+    pipeline.language = "pt_PT"
+    rendered = pipeline._render_plan_summary(QuizPlan(analysis="Sem perguntas"))
+
+    assert rendered == "(plano vazio)"

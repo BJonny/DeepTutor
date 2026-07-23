@@ -6,6 +6,7 @@ import {
   Boxes,
   Brain,
   BrainCircuit,
+  BookOpenText,
   Clapperboard,
   Database,
   FileScan,
@@ -160,6 +161,17 @@ const MODEL_CHILDREN: SettingsLeaf[] = [
 ];
 
 const CHAT_CHILDREN: SettingsLeaf[] = [
+  {
+    key: "prompt-examples",
+    href: "/settings/prompt-examples",
+    label: { zh: "提示词示例", en: "Prompt examples" },
+    blurb: {
+      zh: "聊天模式与已安装 Academics 技能的可复制起始提示词。",
+      en: "Copy-ready starters for chat modes and installed Academics skills.",
+    },
+    icon: BookOpenText,
+    tile: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  },
   {
     key: "tools",
     href: "/settings/tools",
@@ -360,6 +372,7 @@ const HUB_LABEL: Lang = { zh: "设置", en: "Settings" };
 /** Routes that are pure navigation (hub + sub-hubs) — no Save/Apply toolbar. */
 const NAV_ONLY_ROUTES = new Set<string>([
   SETTINGS_HUB_HREF,
+  "/settings/prompt-examples",
   ...SETTINGS_CATEGORIES.filter((c) => c.children).map((c) => c.href),
 ]);
 
